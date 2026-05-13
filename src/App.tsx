@@ -1,6 +1,6 @@
 import { FormEvent, ReactNode, useMemo, useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import { CollageHero } from "@/components/ui/prisma-hero";
+import { CollageHero, heroMediaSrc } from "@/components/ui/prisma-hero";
 
 type Page = "home" | "shop";
 type ProjectKey = "major" | "mini" | "web" | "ai" | "mobile" | "cyber";
@@ -45,6 +45,11 @@ interface ProjectItem {
   blurb: string;
   includes: string[];
   projectType: ProjectKey;
+}
+
+interface ProjectVisual {
+  image: string;
+  alt: string;
 }
 
 const proofPoints = [
@@ -176,6 +181,49 @@ const categories: CategoryKey[] = [
   "Mobile/IoT",
   "Cloud",
 ];
+
+const projectVisuals: Record<Exclude<CategoryKey, "All">, ProjectVisual> = {
+  "AI/ML": {
+    image:
+      "https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=1200&q=80",
+    alt: "AI robotics visual on a screen",
+  },
+  Web: {
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    alt: "Laptop showing software code",
+  },
+  Cybersecurity: {
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    alt: "Security dashboard on a laptop",
+  },
+  "Data Science": {
+    image:
+      "https://images.unsplash.com/photo-1555255707-c07966088b7b?auto=format&fit=crop&w=1200&q=80",
+    alt: "Machine learning and analytics visual",
+  },
+  CN: {
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    alt: "Network monitoring dashboard",
+  },
+  CSBS: {
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    alt: "Business software workspace",
+  },
+  "Mobile/IoT": {
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    alt: "Mobile app development workspace",
+  },
+  Cloud: {
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    alt: "Cloud software dashboard",
+  },
+};
 
 const projectCatalog: ProjectItem[] = [
   {
@@ -1052,6 +1100,24 @@ const ShopPage = ({
             className={`mt-5 max-w-6xl ${displayClass}`}
           />
 
+          <div className="relative mt-10 min-h-[320px] overflow-hidden rounded-lg bg-ink text-primary shadow-[0_22px_70px_rgba(8,8,6,0.16)] md:min-h-[420px]">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              src={heroMediaSrc}
+              className="absolute inset-0 h-full w-full object-cover opacity-80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/30 to-black/10" />
+            <div className="relative flex min-h-[320px] flex-col justify-end p-6 md:min-h-[420px] md:p-8 lg:p-10">
+              <p className={`${eyebrowClass} text-primary/70`}>Catalog preview</p>
+              <p className="mt-4 max-w-3xl text-[clamp(2.45rem,9vw,5rem)] font-semibold leading-[0.96]">
+                AI, web, cyber, data and cloud builds.
+              </p>
+            </div>
+          </div>
+
           <div className="mt-10 flex flex-wrap gap-2">
             {categories.map((category) => (
               <button
@@ -1070,64 +1136,84 @@ const ShopPage = ({
           </div>
 
           <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {filteredProjects.map((project, index) => (
-              <motion.article
-                key={project.id}
-                initial={{ y: 24, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true, margin: "-12%" }}
-                transition={{ duration: 0.5, delay: (index % 6) * 0.04, ease: [0.16, 1, 0.3, 1] }}
-                className={`flex min-h-[420px] flex-col justify-between rounded-lg border p-6 transition ${
-                  selectedProject?.id === project.id
-                    ? "border-ink bg-ink text-primary"
-                    : "border-black/10 bg-white text-ink"
-                }`}
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-4">
-                    <span
-                      className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
-                        selectedProject?.id === project.id ? "bg-primary/10" : "bg-paper"
-                      }`}
-                    >
-                      {project.category}
-                    </span>
-                    <span className="text-sm font-semibold opacity-60">{project.timeline}</span>
-                  </div>
-                  <RevealText as="h2" text={project.title} variant={index % 2 === 0 ? "lift" : "fade"} className={`mt-8 ${cardTitleClass}`} />
-                  <p className={`mt-5 text-xl font-semibold leading-8 ${selectedProject?.id === project.id ? "text-primary/64" : "text-black/60"}`}>
-                    {project.blurb}
-                  </p>
-                </div>
+            {filteredProjects.map((project, index) => {
+              const visual = projectVisuals[project.category];
+              const isSelected = selectedProject?.id === project.id;
 
-                <div className="mt-8">
-                  <p className="text-lg font-semibold opacity-70">{project.stack}</p>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    {project.includes.map((item) => (
-                      <span
-                        key={item}
-                        className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
-                          selectedProject?.id === project.id ? "bg-primary/10" : "bg-paper"
+              return (
+                <motion.article
+                  key={project.id}
+                  initial={{ y: 24, opacity: 0 }}
+                  whileInView={{ y: 0, opacity: 1 }}
+                  viewport={{ once: true, margin: "-12%" }}
+                  transition={{ duration: 0.5, delay: (index % 6) * 0.04, ease: [0.16, 1, 0.3, 1] }}
+                  className={`group flex min-h-[560px] flex-col overflow-hidden rounded-lg border transition ${
+                    isSelected
+                      ? "border-ink bg-ink text-primary shadow-[0_20px_60px_rgba(8,8,6,0.2)]"
+                      : "border-black/10 bg-white text-ink"
+                  }`}
+                >
+                  <div className="relative h-52 overflow-hidden bg-ink sm:h-56">
+                    <img
+                      src={visual.image}
+                      alt={visual.alt}
+                      loading="lazy"
+                      className={`absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105 ${
+                        isSelected ? "opacity-72" : "opacity-88"
+                      }`}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/18 to-black/6" />
+                    <div className="relative flex h-full items-start justify-between gap-4 p-5">
+                      <span className="rounded-md bg-white/14 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
+                        {project.category}
+                      </span>
+                      <span className="rounded-md bg-black/22 px-3 py-1.5 text-sm font-semibold text-white/82 backdrop-blur">
+                        {project.timeline}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col justify-between p-6">
+                    <div>
+                      <RevealText
+                        as="h2"
+                        text={project.title}
+                        variant={index % 2 === 0 ? "lift" : "fade"}
+                        className={`${cardTitleClass}`}
+                      />
+                      <p className={`mt-5 text-xl font-semibold leading-8 ${isSelected ? "text-primary/64" : "text-black/60"}`}>
+                        {project.blurb}
+                      </p>
+                    </div>
+
+                    <div className="mt-8">
+                      <p className="text-lg font-semibold opacity-70">{project.stack}</p>
+                      <div className="mt-5 flex flex-wrap gap-2">
+                        {project.includes.map((item) => (
+                          <span
+                            key={item}
+                            className={`rounded-md px-3 py-1.5 text-sm font-semibold ${
+                              isSelected ? "bg-primary/10" : "bg-paper"
+                            }`}
+                          >
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => bookProject(project)}
+                        className={`mt-7 h-14 w-full rounded-md text-lg font-semibold transition hover:-translate-y-0.5 ${
+                          isSelected ? "bg-primary text-ink" : "bg-ink text-primary"
                         }`}
                       >
-                        {item}
-                      </span>
-                    ))}
+                        Book this project
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => bookProject(project)}
-                    className={`mt-7 h-14 w-full rounded-md text-lg font-semibold transition hover:-translate-y-0.5 ${
-                      selectedProject?.id === project.id
-                        ? "bg-primary text-ink"
-                        : "bg-ink text-primary"
-                    }`}
-                  >
-                    Book this project
-                  </button>
-                </div>
-              </motion.article>
-            ))}
+                </motion.article>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -1141,15 +1227,23 @@ const ShopPage = ({
               Choose a catalog idea or edit the form for a custom build.
             </RevealBlock>
             {selectedProject && (
-              <div className="mt-10 rounded-lg border border-primary/12 bg-primary/[0.04] p-6">
-                <p className="text-sm font-semibold uppercase text-primary/50">Selected</p>
-                <RevealText
-                  as="h3"
-                  text={selectedProject.title}
-                  variant="lift"
-                  className="mt-3 text-4xl font-semibold leading-[0.98]"
+              <div className="mt-10 overflow-hidden rounded-lg border border-primary/12 bg-primary/[0.04]">
+                <img
+                  src={projectVisuals[selectedProject.category].image}
+                  alt={projectVisuals[selectedProject.category].alt}
+                  loading="lazy"
+                  className="h-44 w-full object-cover opacity-80"
                 />
-                <p className="mt-4 text-xl font-semibold text-primary/62">{selectedProject.stack}</p>
+                <div className="p-6">
+                  <p className="text-sm font-semibold uppercase text-primary/50">Selected</p>
+                  <RevealText
+                    as="h3"
+                    text={selectedProject.title}
+                    variant="lift"
+                    className="mt-3 text-4xl font-semibold leading-[0.98]"
+                  />
+                  <p className="mt-4 text-xl font-semibold text-primary/62">{selectedProject.stack}</p>
+                </div>
               </div>
             )}
           </div>
